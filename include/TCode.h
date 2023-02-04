@@ -69,6 +69,7 @@ public:
     void inputString(const String &input);                                        // Function to take in a string as input to the command buffer
     int axisRead(const String &ID);                                               // Function to read the current position of an axis
     void axisWrite(const String &ID, int magnitude, char ext, long extMagnitude); // Function to set an axis
+    void axisWrite(const String &ID, int magnitude);                              // Overloaded helper function for axisWrite without an extension
     unsigned long axisLastT(const String &ID);                                    // Function to query when an axis was last commanded
     void axisRegister(const String &ID, const String &Name);                      // Function to name and activate axis
     bool axisChanged(const String &ID);                                           // Function to check if an axis has changed
@@ -253,6 +254,12 @@ void TCode<TCODE_CHANNEL_COUNT>::axisWrite(const String &inputID, int magnitude,
     {
         axis->set(magnitude, extension, extMagnitude);
     }
+}
+
+template <unsigned TCODE_CHANNEL_COUNT>
+void TCode<TCODE_CHANNEL_COUNT>::axisWrite(const String &inputID, int magnitude)
+{
+    axisWrite(inputID, magnitude, ' ', 0);
 }
 
 template <unsigned TCODE_CHANNEL_COUNT>
