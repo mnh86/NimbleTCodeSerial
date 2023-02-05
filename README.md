@@ -59,6 +59,15 @@ On windows...
               "ActuatorType": "Position"
             }
           ],
+          "ScalarCmd": [
+            {
+              "StepRange": [
+                0,
+                100
+              ],
+              "ActuatorType": "Vibrate"
+            }
+          ],
           "FleshlightLaunchFW12Cmd": {}
         }
       }

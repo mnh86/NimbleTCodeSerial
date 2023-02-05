@@ -4,7 +4,7 @@
 #include "nimbleConModule.h"
 #include "TCode.h"
 
-#define FIRMWAREVERSION "NimbleStroker_TCode_Serial_v0.1"
+#define FIRMWAREVERSION "NimbleStroker_TCode_Serial_v0.2"
 
 TCode<2> tcode(FIRMWAREVERSION);
 
@@ -18,10 +18,12 @@ int16_t targetPos = 0; // position controlled via TCode
 int16_t lastFramePos = 0;  // positon that was sent to the actuator last loop frame
 int16_t frameForce = IDLE_FORCE; // next force to send to the actuator (0 to 1023)
 
+#define VIBRATION_MAX_AMP 40
 #define VIBRATION_SPEED 10.0 // hz
+
 static int vibSpeedMillis = 1000 / VIBRATION_SPEED;
 uint16_t vibrationAmplitude = 0; // in position units (0 to 10)
-#define VIBRATION_MAX_AMP 20
+int16_t vibrationPos = 0;
 
 BfButton btn(BfButton::STANDALONE_DIGITAL, ENC_BUTT, true, LOW);
 
@@ -92,12 +94,48 @@ void logTimer()
     printState();
 }
 
+void ledPulse(short int pos, short int vibPos, bool isOn = true)
+{
+    byte ledScale = map(abs(pos), 1, ACTUATOR_MAX_POS, 1, LED_MAX_DUTY);
+    byte ledState1 = 0;
+    byte ledState2 = 0;
+    byte vibScale = map(abs(vibPos), 1, VIBRATION_MAX_AMP, 1, LED_MAX_DUTY);
+    byte vibState1 = 0;
+    byte vibState2 = 0;
+
+    if (isOn)
+    {
+        if (pos < 0) {
+            ledState1 = ledScale;
+        } else if (pos > 0) {
+            ledState2 = ledScale;
+        }
+
+        if (vibPos < 0) {
+            vibState1 = vibScale;
+        } else if (vibPos > 0) {
+            vibState2 = vibScale;
+        }
+    }
+
+    ledcWrite(ENC_LED_N,  ledState1);
+    ledcWrite(ENC_LED_SE, ledState1);
+    ledcWrite(ENC_LED_SW, ledState1);
+
+    ledcWrite(ENC_LED_NE, ledState2);
+    ledcWrite(ENC_LED_NW, ledState2);
+    ledcWrite(ENC_LED_S,  ledState2);
+
+    ledcWrite(ENC_LED_W, vibState1);
+    ledcWrite(ENC_LED_E, vibState2);
+}
+
 void updateLEDs()
 {
     if (!ledUpdateDelay.justFinished()) return;
     ledUpdateDelay.repeat();
 
-    ledPositionPulse(lastFramePos, true);
+    ledPulse(lastFramePos, vibrationPos);
     pendant.present ? ledcWrite(PEND_LED, 50) : ledcWrite(PEND_LED, 0); // Display pendant connection status on LED.
     actuator.present ? ledcWrite(ACT_LED, 50) : ledcWrite(ACT_LED, 0);  // Display actuator connection status on LED.
 }
@@ -121,7 +159,7 @@ void positionHandler()
     int vibModMillis = millis() % vibSpeedMillis;
     float tempPos = float(vibModMillis) / vibSpeedMillis;
     int vibWaveDeg = tempPos * 360;
-    int vibWavePos = sin(radians(vibWaveDeg)) * vibrationAmplitude;
+    vibrationPos = sin(radians(vibWaveDeg)) * vibrationAmplitude;
 
     int targetPosTmp = targetPos;
     if (targetPos - vibrationAmplitude < -ACTUATOR_MAX_POS) {
@@ -129,7 +167,7 @@ void positionHandler()
     } else if (targetPos + vibrationAmplitude > ACTUATOR_MAX_POS) {
         targetPosTmp = targetPos - vibrationAmplitude;
     }
-    framePosition = targetPosTmp + vibWavePos;
+    framePosition = targetPosTmp + vibrationPos;
 }
 
 void airHandler()
