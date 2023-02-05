@@ -48,7 +48,7 @@ On windows...
         }
       ],
       "defaults": {
-        "name": "TCode v0.3 (Single Linear Axis)",
+        "name": "NimbleStroker Connectivity Module (Serial TCode v0.3)",
         "messages": {
           "LinearCmd": [
             {
