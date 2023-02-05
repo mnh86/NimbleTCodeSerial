@@ -60,7 +60,8 @@ On windows...
                 0,
                 100
               ],
-              "ActuatorType": "Position"
+              "ActuatorType": "Position",
+              "FeatureDescriptor": "Up/Down Position (L0)"
             }
           ],
           "ScalarCmd": [
@@ -69,10 +70,10 @@ On windows...
                 0,
                 100
               ],
-              "ActuatorType": "Vibrate"
+              "ActuatorType": "Vibrate",
+              "FeatureDescriptor": "Vibration (V0)"
             }
-          ],
-          "FleshlightLaunchFW12Cmd": {}
+          ]
         }
       }
     },
