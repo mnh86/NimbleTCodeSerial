@@ -82,7 +82,7 @@ On windows...
 4. Under `Settings -> Device Managers`, toggle on `Serial Port`
 5. Click the `Start Server` Icon (top left) to start the server
 6. Under `Devices` click `Start Scanning`...
-7. A new device should show up: "TCode v0.3 (Single Linear Axis)"
+7. A new device should show up with the name configured in the JSON file.
 8. Click the `Toggle Oscillation` button and watch the NimbleConModule LEDs spin.
 
 ## Attributions
