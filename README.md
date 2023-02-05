@@ -38,7 +38,7 @@ Toy Code (T-Code) v0.2 compatible Serial Port implementation for the [NimbleStro
 On windows...
 
 1. Open the Intiface config file: `C:\Users\(User)\AppData\Roaming\com.nonpolynomial\intiface_central\config\buttplug-device-config.json`
-2. Find the JSON block for `tcode-v03`. Change the `port` to the one with your attached NimbleConModule. ie.:
+2. Find the [JSON block for `tcode-v03`](https://github.com/buttplugio/buttplug/blob/9159c402d866161d55363aad23626df6c006e518/buttplug/buttplug-device-config/buttplug-device-config.json#L4183-L4208). Change the `port` to the one with your attached NimbleConModule, and add a `ScalarCmd` for the vibration parameter. ie:
    ```
    ...
    "tcode-v03": {
