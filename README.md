@@ -33,7 +33,7 @@ Toy Code (T-Code) v0.2 compatible Serial Port implementation for the [NimbleStro
 
 On windows...
 
-1. Open the Initface config file: `C:\Users\(User)\AppData\Roaming\com.nonpolynomial\intiface_central\config\buttplug-device-config.json`
+1. Open the Intiface config file: `C:\Users\(User)\AppData\Roaming\com.nonpolynomial\intiface_central\config\buttplug-device-config.json`
 2. Find the JSON block for `tcode-v03`. Change the `port` to the one with your attached NimbleConModule. ie.:
    ```
    ...
@@ -65,7 +65,7 @@ On windows...
     },
     ...
     ```
-3. Launch Initface Central
+3. Launch Intiface Central
 4. Under `Settings -> Device Managers`, toggle on `Serial Port`
 5. Click the `Start Server` Icon (top left) to start the server
 6. Under `Devices` click `Start Scanning`...
