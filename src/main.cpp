@@ -6,7 +6,7 @@
 
 #define FIRMWAREVERSION "NimbleStroker_TCode_Serial_v0.2"
 
-TCode<2> tcode(FIRMWAREVERSION);
+TCode<3> tcode(FIRMWAREVERSION);
 
 millisDelay ledUpdateDelay;
 millisDelay logDelay;
@@ -18,12 +18,29 @@ int16_t targetPos = 0; // position controlled via TCode
 int16_t lastFramePos = 0;  // positon that was sent to the actuator last loop frame
 int16_t frameForce = IDLE_FORCE; // next force to send to the actuator (0 to 1023)
 
-#define VIBRATION_MAX_AMP 40
-#define VIBRATION_SPEED 10.0 // hz
+#define VIBRATION_MAX_AMP 25
+#define VIBRATION_MAX_SPEED 20.0 // hz
 
-static int vibSpeedMillis = 1000 / VIBRATION_SPEED;
+float vibrationSpeed = 10.0; // hz
 uint16_t vibrationAmplitude = 0; // in position units (0 to 10)
 int16_t vibrationPos = 0;
+
+#define RUN_MODE_OFF 0
+#define RUN_MODE_ON 1
+
+bool runMode = RUN_MODE_ON;
+
+void setRunMode(bool rm)
+{
+    if (runMode == rm) return;
+    runMode = rm;
+    if (runMode == RUN_MODE_OFF) {
+        tcode.stop();
+        Serial.println("Stopped");
+    } else {
+        Serial.println("Started");
+    }
+}
 
 BfButton btn(BfButton::STANDALONE_DIGITAL, ENC_BUTT, true, LOW);
 
@@ -31,9 +48,11 @@ void pressHandler(BfButton *btn, BfButton::press_pattern_t pattern)
 {
     switch (pattern)
     {
+    case BfButton::DOUBLE_PRESS: // Start
+        setRunMode(RUN_MODE_ON);
+        break;
     case BfButton::LONG_PRESS: // Stop
-        tcode.stop();
-        Serial.println("Stop/Reset");
+        setRunMode(RUN_MODE_OFF);
         break;
     }
 }
@@ -41,11 +60,13 @@ void pressHandler(BfButton *btn, BfButton::press_pattern_t pattern)
 void printState() {
     Serial.printf("------------------\n");
     Serial.printf("   VibAmp: %5d\n", vibrationAmplitude);
+    Serial.printf(" VibSpeed: %0.2f (hz)\n", vibrationSpeed);
     Serial.printf("   TarPos: %5d\n", targetPos);
     Serial.printf("      Pos: %5d\n", lastFramePos);
     Serial.printf("    Force: %5d\n", frameForce);
     Serial.printf("    AirIn: %5d\n", actuator.airIn);
     Serial.printf("   AirOut: %5d\n", actuator.airOut);
+    Serial.printf("TempLimit: %s\n",  actuator.tempLimiting ? "true" : "false");
 }
 
 void setup()
@@ -59,14 +80,17 @@ void setup()
     tcode.axisRegister("V0", F("Vibe"));
     tcode.axisRegister("A0", F("Air"));
     tcode.axisRegister("A1", F("Force"));
+    tcode.axisRegister("A2", F("VibeSpeed"));
     tcode.axisEasingType("L0", EasingType::EASEINOUT);
     tcode.axisWrite("L0", 5000);
     tcode.axisWrite("V0", 0);
     tcode.axisWrite("A0", 5000);
     tcode.axisWrite("A1", 9999);
+    tcode.axisWrite("A2", 5000);
 
     // Button interface
-    btn.onPressFor(pressHandler, 2000);
+    btn.onDoublePress(pressHandler)
+        .onPressFor(pressHandler, 2000);
 
     // Timers setup
 #ifdef DEBUG
@@ -152,10 +176,10 @@ void positionHandler()
 
     if (tcode.axisChanged("V0")) {
         int val = tcode.axisRead("V0");
-        int tmpAmp = map(val, 0, 9999, 0, VIBRATION_MAX_AMP * 100);
-        vibrationAmplitude = (tmpAmp > 0) ? tmpAmp / 100 : 0;
+        vibrationAmplitude = map(val, 0, 9999, 0, VIBRATION_MAX_AMP);
     }
 
+    int vibSpeedMillis = 1000 / vibrationSpeed;
     int vibModMillis = millis() % vibSpeedMillis;
     float tempPos = float(vibModMillis) / vibSpeedMillis;
     int vibWaveDeg = tempPos * 360;
@@ -186,6 +210,15 @@ void forceHandler()
     frameForce = map(val, 0, 9999, 0, MAX_FORCE);
 }
 
+void vibrationSpeedHandler()
+{
+    if (!tcode.axisChanged("A2")) return;
+    int val = tcode.axisRead("A2");
+    int maxSpeed = VIBRATION_MAX_SPEED * 100;
+    int newSpeed = map(val, 0, 9999, 0, maxSpeed);
+    vibrationSpeed = float(newSpeed) / 100;
+}
+
 void loop()
 {
     btn.read();
@@ -195,6 +228,7 @@ void loop()
         tcode.inputByte(Serial.read());
     }
 
+    vibrationSpeedHandler();
     positionHandler();
     airHandler();
     forceHandler();
@@ -202,17 +236,22 @@ void loop()
     // Send packet of values to the actuator when time is ready
     if (checkTimer())
     {
-        lastFramePos = clampPositionDelta();
-        actuator.positionCommand = lastFramePos;
-        actuator.forceCommand = frameForce;
+        if (runMode == RUN_MODE_ON) {
+            lastFramePos = clampPositionDelta();
+            actuator.positionCommand = lastFramePos;
+            actuator.forceCommand = frameForce;
+        }
         sendToAct();
     }
 
     if (readFromAct()) // Read current state from actuator.
     { // If the function returns true, the values were updated.
-        if (actuator.tempLimiting) {
-            tcode.stop();
-        }
+
+        // Unclear yet if any action is required when tempLimiting is occurring.
+        // A comparison is needed with the Pendant behavior.
+        // if (actuator.tempLimiting) {
+        //     setRunMode(RUN_MODE_OFF);
+        // }
     }
 
     updateLEDs();
