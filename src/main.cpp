@@ -1,9 +1,10 @@
 #include <Arduino.h>
+#include <millisDelay.h>
+#include <BfButton.h>
 #include "nimbleConModule.h"
 #include "TCode.h"
-#include <millisDelay.h>
 
-#define FIRMWAREVERSION "NimbleStroker_TCode_Serial_POC"
+#define FIRMWAREVERSION "NimbleStroker_TCode_Serial_v0.1"
 
 TCode<2> tcode(FIRMWAREVERSION);
 
@@ -12,15 +13,36 @@ millisDelay logDelay;
 
 #define MAX_POSITION_DELTA 50
 
-int16_t framePosition = 0; // -1000 to 1000
-int16_t lastFramePos = 0;  // -1000 to 1000
-int16_t frameForce = IDLE_FORCE; // (0 to 1023)
+int16_t framePosition = 0; // next position to send to actuator (-1000 to 1000)
+int16_t targetPos = 0; // position controlled via TCode
+int16_t lastFramePos = 0;  // positon that was sent to the actuator last loop frame
+int16_t frameForce = IDLE_FORCE; // next force to send to the actuator (0 to 1023)
+
+#define VIBRATION_SPEED 10.0 // hz
+static int vibSpeedMillis = 1000 / VIBRATION_SPEED;
+uint16_t vibrationAmplitude = 0; // in position units (0 to 10)
+#define VIBRATION_MAX_AMP 20
+
+BfButton btn(BfButton::STANDALONE_DIGITAL, ENC_BUTT, true, LOW);
+
+void pressHandler(BfButton *btn, BfButton::press_pattern_t pattern)
+{
+    switch (pattern)
+    {
+    case BfButton::LONG_PRESS: // Stop
+        tcode.stop();
+        Serial.println("Stop/Reset");
+        break;
+    }
+}
 
 void printState() {
     Serial.printf("------------------\n");
+    Serial.printf("   VibAmp: %5d\n", vibrationAmplitude);
+    Serial.printf("   TarPos: %5d\n", targetPos);
     Serial.printf("      Pos: %5d\n", lastFramePos);
     Serial.printf("    Force: %5d\n", frameForce);
-    Serial.printf("   AirOut: %5d\n", actuator.airIn);
+    Serial.printf("    AirIn: %5d\n", actuator.airIn);
     Serial.printf("   AirOut: %5d\n", actuator.airOut);
 }
 
@@ -32,7 +54,7 @@ void setup()
     // TCode setup
     tcode.init();
     tcode.axisRegister("L0", F("Up"));
-    tcode.axisRegister("V0", F("Vibe0"));
+    tcode.axisRegister("V0", F("Vibe"));
     tcode.axisRegister("A0", F("Air"));
     tcode.axisRegister("A1", F("Force"));
     tcode.axisEasingType("L0", EasingType::EASEINOUT);
@@ -41,11 +63,16 @@ void setup()
     tcode.axisWrite("A0", 5000);
     tcode.axisWrite("A1", 9999);
 
+    // Button interface
+    btn.onPressFor(pressHandler, 2000);
+
     // Timers setup
+#ifdef DEBUG
     delay(3000);
+    Serial.println("Ready!");
+#endif
     ledUpdateDelay.start(30);
     logDelay.start(1000);
-    Serial.println("Ready!");
 }
 
 int16_t clampPositionDelta() {
@@ -75,18 +102,34 @@ void updateLEDs()
     actuator.present ? ledcWrite(ACT_LED, 50) : ledcWrite(ACT_LED, 0);  // Display actuator connection status on LED.
 }
 
-void upPositionHandler()
+/**
+ * Up position is mixed with a vibration oscillator wave
+ */
+void positionHandler()
 {
-    if (!tcode.axisChanged("L0")) return;
-    int val = tcode.axisRead("L0");
-    framePosition = map(val, 0, 9999, -ACTUATOR_MAX_POS, ACTUATOR_MAX_POS);
-}
+    if (!tcode.axisChanged("L0")) {
+        int val = tcode.axisRead("L0");
+        targetPos = map(val, 0, 9999, -ACTUATOR_MAX_POS, ACTUATOR_MAX_POS);
+    }
 
-void vibrationHandler()
-{
-    if (!tcode.axisChanged("V0")) return;
-    int val = tcode.axisRead("V0");
-    // TODO
+    if (tcode.axisChanged("V0")) {
+        int val = tcode.axisRead("V0");
+        int tmpAmp = map(val, 0, 9999, 0, VIBRATION_MAX_AMP * 100);
+        vibrationAmplitude = (tmpAmp > 0) ? tmpAmp / 100 : 0;
+    }
+
+    int vibModMillis = millis() % vibSpeedMillis;
+    float tempPos = float(vibModMillis) / vibSpeedMillis;
+    int vibWaveDeg = tempPos * 360;
+    int vibWavePos = sin(radians(vibWaveDeg)) * vibrationAmplitude;
+
+    int targetPosTmp = targetPos;
+    if (targetPos - vibrationAmplitude < -ACTUATOR_MAX_POS) {
+        targetPosTmp = targetPos + vibrationAmplitude;
+    } else if (targetPos + vibrationAmplitude > ACTUATOR_MAX_POS) {
+        targetPosTmp = targetPos - vibrationAmplitude;
+    }
+    framePosition = targetPosTmp + vibWavePos;
 }
 
 void airHandler()
@@ -107,13 +150,14 @@ void forceHandler()
 
 void loop()
 {
+    btn.read();
+
     while (Serial.available() > 0)
     {
         tcode.inputByte(Serial.read());
     }
 
-    upPositionHandler();
-    vibrationHandler();
+    positionHandler();
     airHandler();
     forceHandler();
 
@@ -134,5 +178,7 @@ void loop()
     }
 
     updateLEDs();
+#ifdef DEBUG
     logTimer();
+#endif
 }
