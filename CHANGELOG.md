@@ -1,5 +1,8 @@
 # Change log
 
+## v0.3
+- Reduced the maximum setting for the vibration amplitude from 25 to 20 (position units).
+
 ## v0.2 - 02/05/2023
 - Added new aux axis for controlling vibration speed via tcode
   - `A2 0 9999 VibSpeed`: **Vibration speed** (default: `5000`)

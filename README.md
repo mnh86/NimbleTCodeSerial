@@ -1,6 +1,6 @@
 # NimbleTCodeSerial
 
-Toy Code (T-Code) v0.2 compatible Serial Port implementation for the [NimbleStroker](https://shop.exploratorydevices.com/) and [NimbleConModule](https://shop.exploratorydevices.com/product/connectivity-module-dev-kit/).
+[Toy Code (T-Code) v0.3](https://github.com/multiaxis/tcode-spec) compatible Serial Port implementation for the [NimbleStroker](https://shop.exploratorydevices.com/) and [NimbleConModule](https://shop.exploratorydevices.com/product/connectivity-module-dev-kit/).
 
 ## TCode Information
 
@@ -11,7 +11,7 @@ Toy Code (T-Code) v0.2 compatible Serial Port implementation for the [NimbleStro
     - Maps to NimbleStroker positions: -1000 to 1000
   - `V0 0 9999 Vibe`: **Vibration intensity** (default: `0`)
     - An oscillation is applied to the position when sent to the NimbleStroker.
-    - Maps to the amplitude of oscillation: 0 to 25 (position units)
+    - Maps to the amplitude of oscillation: 0 to 20 (position units)
   - `A0 0 9999 Air`: **Auxilliary air in/out valve** (default `5000`)
     - Value `0000` = air-out valve (looser)
     - Value `5000` = stop valve (default)
@@ -22,20 +22,25 @@ Toy Code (T-Code) v0.2 compatible Serial Port implementation for the [NimbleStro
   - `A2 0 9999 VibSpeed`: **Vibration speed** (default: `5000`)
     - Maps to an oscillation speed for vibration: 0 to 20.0hz (default 10.0hz)
 
+Other info:
+
+- Sending live control values to an axis will ease to target over multiple frames rather than jump immediately, if the difference in change is large (> 100 t-code units, or >50 position units). This is intended to protect the user and device. ([Source1](https://github.com/mnh86/NimbleTCodeSerial/blob/6ab66638b2670115e770fdee9d2ec5c7b04f9390/include/TCodeAxis.h#L217-L228), [Source2](https://github.com/mnh86/NimbleTCodeSerial/blob/6ab66638b2670115e770fdee9d2ec5c7b04f9390/src/main.cpp#L104-L111))
+
 ## Usage
 
-1. Set up [VSCode with PlatformIO](https://randomnerdtutorials.com/vs-code-platformio-ide-esp32-esp8266-arduino/)
-2. Clone this repo and open the project in VSCode
-3. Build and upload this program into the NimbleConModule
-4. Attach the NimbleConModule to the actuator (Label A)
+1. Install [Windows Virtual COM Port (VCP) drivers](https://github.com/mnh86/NimbleConModule/blob/feat/docs/docs/setup-guide-windows-arduino-ide1.md#install-windows-virtual-com-port-vcp-drivers) for the USB/serial connection to the module.
+2. Set up [VSCode with PlatformIO](https://randomnerdtutorials.com/vs-code-platformio-ide-esp32-esp8266-arduino/)
+3. Clone this repo and open the project in VSCode
+4. Build and upload this program into the NimbleConModule
+5. Attach the NimbleConModule to the actuator (Label A)
    - Note: Pendant connection not supported
-5. Long press the Encoder Dial (2 seconds) to stop commands to the actuator
-6. Double press the Encoder Dial to resume sending commands to the actuator
-7. Open the PlatformIO Serial Monitor. Enter a TCode command (ie. `D2`) to test.
+6. Long press the Encoder Dial (2 seconds) to stop commands to the actuator
+7. Double press the Encoder Dial to resume sending commands to the actuator
+8. Open the PlatformIO Serial Monitor. Enter a TCode command (ie. `D2`) to test.
 
 ## Testing with Intiface® Central
 
-On windows...
+On Windows with [Intiface Central](https://intiface.com/central/) installed...
 
 1. Open the Intiface config file: `C:\Users\(User)\AppData\Roaming\com.nonpolynomial\intiface_central\config\buttplug-device-config.json`
 2. Find the [JSON block for `tcode-v03`](https://github.com/buttplugio/buttplug/blob/9159c402d866161d55363aad23626df6c006e518/buttplug/buttplug-device-config/buttplug-device-config.json#L4183-L4208). Change the `port` to the one with your attached NimbleConModule, and add a `ScalarCmd` for the vibration parameter. ie:
@@ -79,9 +84,9 @@ On windows...
     },
     ...
     ```
-3. Launch Intiface Central
-4. Under `Settings -> Device Managers`, toggle on `Serial Port`
-5. Click the `Start Server` Icon (top left) to start the server
+3. Launch the [Intiface Central](https://intiface.com/central/) application.
+4. Under `Settings -> Device Managers`, toggle on `Serial Port`.
+5. Click the `Start Server` Icon (top left) to start the server.
 6. Under `Devices` click `Start Scanning`...
 7. A new device should show up with the name configured in the JSON file.
 8. Click the `Toggle Oscillation` button and watch the NimbleConModule LEDs spin.

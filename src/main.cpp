@@ -4,7 +4,7 @@
 #include "nimbleConModule.h"
 #include "TCode.h"
 
-#define FIRMWAREVERSION "NimbleStroker_TCode_Serial_v0.2"
+#define FIRMWAREVERSION "NimbleStroker_TCode_Serial_v0.3"
 
 TCode<3> tcode(FIRMWAREVERSION);
 
@@ -18,7 +18,7 @@ int16_t targetPos = 0; // position controlled via TCode
 int16_t lastFramePos = 0;  // positon that was sent to the actuator last loop frame
 int16_t frameForce = IDLE_FORCE; // next force to send to the actuator (0 to 1023)
 
-#define VIBRATION_MAX_AMP 25
+#define VIBRATION_MAX_AMP 20
 #define VIBRATION_MAX_SPEED 20.0 // hz
 
 float vibrationSpeed = 10.0; // hz
