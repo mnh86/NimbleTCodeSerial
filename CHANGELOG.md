@@ -1,7 +1,11 @@
 # Change log
 
-## v0.3
-- Reduced the maximum setting for the vibration amplitude from 25 to 20 (position units).
+## v0.3 - 02/06/2023
+- Fix: Divide by zero crash during vibration calculations.
+- `L0` Up Position: mapped range was changed from (-1000 -> 1000) to (-750 -> 750). Based on analysis of Pendant behavior which does not send values higher than 750. Testing values at 1000 causes slamming of the actuator piston to occur against its enclosure.
+- `V0` Vibration Amplitude: internal range was changed from (0 -> 20) to (0 -> 25) position units. Its default is now 25, which matches more closely with the NimbleStroker Pendant behavior.
+- `V0` Vibration Amplitude: changes will now ease in and out rather than a linear change.
+- `A2` Vibration Speed: default was changed from 10hz to 20hz.
 
 ## v0.2 - 02/05/2023
 - Added new aux axis for controlling vibration speed via tcode

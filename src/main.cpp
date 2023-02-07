@@ -18,11 +18,11 @@ int16_t targetPos = 0; // position controlled via TCode
 int16_t lastFramePos = 0;  // positon that was sent to the actuator last loop frame
 int16_t frameForce = IDLE_FORCE; // next force to send to the actuator (0 to 1023)
 
-#define VIBRATION_MAX_AMP 20
+#define VIBRATION_MAX_AMP 25
 #define VIBRATION_MAX_SPEED 20.0 // hz
 
-float vibrationSpeed = 10.0; // hz
-uint16_t vibrationAmplitude = 0; // in position units (0 to 10)
+float vibrationSpeed = VIBRATION_MAX_SPEED; // hz
+uint16_t vibrationAmplitude = 0; // in position units (0 to 25)
 int16_t vibrationPos = 0;
 
 #define RUN_MODE_OFF 0
@@ -76,17 +76,22 @@ void setup()
 
     // TCode setup
     tcode.init();
-    tcode.axisRegister("L0", F("Up"));
-    tcode.axisRegister("V0", F("Vibe"));
-    tcode.axisRegister("A0", F("Air"));
-    tcode.axisRegister("A1", F("Force"));
-    tcode.axisRegister("A2", F("VibeSpeed"));
+    tcode.axisRegister("L0", F("Up")); // Up stroke position
+    tcode.axisWrite("L0", 5000); // 5000: midpoint
     tcode.axisEasingType("L0", EasingType::EASEINOUT);
-    tcode.axisWrite("L0", 5000);
-    tcode.axisWrite("V0", 0);
-    tcode.axisWrite("A0", 5000);
-    tcode.axisWrite("A1", 9999);
-    tcode.axisWrite("A2", 5000);
+
+    tcode.axisRegister("V0", F("Vibe")); // Vibration Amplitude
+    tcode.axisWrite("V0", 0);    // 0: vibration off
+    tcode.axisEasingType("V0", EasingType::EASEINOUT);
+
+    tcode.axisRegister("A0", F("Air")); // Air in/out valve
+    tcode.axisWrite("A0", 5000); // 0: air out, 5000: stop, 9999: air in
+
+    tcode.axisRegister("A1", F("Force"));
+    tcode.axisWrite("A1", 9999); // 9999: max force
+
+    tcode.axisRegister("A2", F("VibeSpeed"));
+    tcode.axisWrite("A2", 9999); // 9999: max vibration speed
 
     // Button interface
     btn.onDoublePress(pressHandler)
@@ -120,10 +125,10 @@ void logTimer()
 
 void ledPulse(short int pos, short int vibPos, bool isOn = true)
 {
-    byte ledScale = map(abs(pos), 1, ACTUATOR_MAX_POS, 1, LED_MAX_DUTY);
+    byte ledScale = map(abs(pos), 0, ACTUATOR_MAX_POS, 1, LED_MAX_DUTY);
     byte ledState1 = 0;
     byte ledState2 = 0;
-    byte vibScale = map(abs(vibPos), 1, VIBRATION_MAX_AMP, 1, LED_MAX_DUTY);
+    byte vibScale = map(abs(vibPos), 0, VIBRATION_MAX_AMP, 1, LED_MAX_DUTY);
     byte vibState1 = 0;
     byte vibState2 = 0;
 
@@ -165,7 +170,7 @@ void updateLEDs()
 }
 
 /**
- * Up position is mixed with a vibration oscillator wave
+ * L0 Up position is mixed with a V0/A2 vibration oscillator
  */
 void positionHandler()
 {
@@ -179,11 +184,20 @@ void positionHandler()
         vibrationAmplitude = map(val, 0, 9999, 0, VIBRATION_MAX_AMP);
     }
 
-    int vibSpeedMillis = 1000 / vibrationSpeed;
-    int vibModMillis = millis() % vibSpeedMillis;
-    float tempPos = float(vibModMillis) / vibSpeedMillis;
-    int vibWaveDeg = tempPos * 360;
-    vibrationPos = sin(radians(vibWaveDeg)) * vibrationAmplitude;
+    if (vibrationAmplitude > 0 && vibrationSpeed > 0) {
+        int vibSpeedMillis = 1000 / vibrationSpeed;
+        int vibModMillis = millis() % vibSpeedMillis;
+        float tempPos = float(vibModMillis) / vibSpeedMillis;
+        int vibWaveDeg = tempPos * 360;
+        vibrationPos = round(sin(radians(vibWaveDeg)) * vibrationAmplitude);
+    } else {
+        vibrationPos = 0;
+    }
+    // Serial.printf("A:%5d S:%0.2f P:%5d\n",
+    //     vibrationAmplitude,
+    //     vibrationSpeed,
+    //     vibrationPos
+    // );
 
     int targetPosTmp = targetPos;
     if (targetPos - vibrationAmplitude < -ACTUATOR_MAX_POS) {
@@ -233,6 +247,18 @@ void loop()
     airHandler();
     forceHandler();
 
+    // if (readFromPend())
+    // { // Read values from pendant. If the function returns true, the values were updated so update the pass-through values.
+    //     // Pass through data from pendant to actuator
+    //     // actuator.positionCommand = pendant.positionCommand; // We control this
+    //     // actuator.forceCommand = pendant.forceCommand;       // We control this
+
+    //     Serial.printf("P P:%4d F:%4d\n",
+    //         pendant.positionCommand,
+    //         pendant.forceCommand
+    //     );
+    // }
+
     // Send packet of values to the actuator when time is ready
     if (checkTimer())
     {
@@ -252,6 +278,12 @@ void loop()
         // if (actuator.tempLimiting) {
         //     setRunMode(RUN_MODE_OFF);
         // }
+
+        // Serial.printf("A P:%4d F:%4d T:%s\n",
+        //     actuator.positionFeedback,
+        //     actuator.forceFeedback,
+        //     actuator.tempLimiting ? "true" : "false"
+        // );
     }
 
     updateLEDs();

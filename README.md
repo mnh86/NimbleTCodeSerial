@@ -8,10 +8,10 @@
 - `D1` - Identify TCode version: `TCode v0.4`
 - `D2` - List available axes and user range preferences:
   - `L0 0 9999 Up`: **Up/down position** linear motion (default: `5000`)
-    - Maps to NimbleStroker positions: -1000 to 1000
+    - Maps to NimbleStroker positions: -750 to 750
   - `V0 0 9999 Vibe`: **Vibration intensity** (default: `0`)
     - An oscillation is applied to the position when sent to the NimbleStroker.
-    - Maps to the amplitude of oscillation: 0 to 20 (position units)
+    - Maps to the amplitude of oscillation: 0 to 25 (position units)
   - `A0 0 9999 Air`: **Auxilliary air in/out valve** (default `5000`)
     - Value `0000` = air-out valve (looser)
     - Value `5000` = stop valve (default)
@@ -19,12 +19,12 @@
   - `A1 0 9999 Force`: **Force command** (default `9999`)
     - Maps to NimbleStroker force command values: 0 to 1023
     - Controls the air pressure force of the actuator(?)
-  - `A2 0 9999 VibSpeed`: **Vibration speed** (default: `5000`)
-    - Maps to an oscillation speed for vibration: 0 to 20.0hz (default 10.0hz)
+  - `A2 0 9999 VibSpeed`: **Vibration speed** (default: `9999`)
+    - Maps to an oscillation speed for vibration: 0 to 20hz (default 20hz)
 
 Other info:
 
-- Sending live control values to an axis will ease to target over multiple frames rather than jump immediately, if the difference in change is large (> 100 t-code units, or >50 position units). This is intended to protect the user and device. ([Source1](https://github.com/mnh86/NimbleTCodeSerial/blob/6ab66638b2670115e770fdee9d2ec5c7b04f9390/include/TCodeAxis.h#L217-L228), [Source2](https://github.com/mnh86/NimbleTCodeSerial/blob/6ab66638b2670115e770fdee9d2ec5c7b04f9390/src/main.cpp#L104-L111))
+- Sending live control values to an axis will ease to target over multiple frames rather than jump immediately when the difference in change is large (> 100 t-code units, or >50 position units). This is intended to protect the user and device. ([Source1](https://github.com/mnh86/NimbleTCodeSerial/blob/6ab66638b2670115e770fdee9d2ec5c7b04f9390/include/TCodeAxis.h#L217-L228), [Source2](https://github.com/mnh86/NimbleTCodeSerial/blob/6ab66638b2670115e770fdee9d2ec5c7b04f9390/src/main.cpp#L104-L111))
 
 ## Usage
 

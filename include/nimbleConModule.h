@@ -104,7 +104,7 @@ struct Pendant
 struct Pendant pendant; // Declare pendant
 
 // Actuator Variables
-#define ACTUATOR_MAX_POS 1000
+#define ACTUATOR_MAX_POS 750
 
 struct Actuator
 {
