@@ -4,7 +4,7 @@
 
 ## TCode Information
 
-- `D0` - Identity device and firmware version: `NimbleStroker_TCode_Serial_v0.2`
+- `D0` - Identity device and firmware version: `NimbleStroker_TCode_Serial_v0.3`
 - `D1` - Identify TCode version: `TCode v0.4`
 - `D2` - List available axes and user range preferences:
   - `L0 0 9999 Up`: **Up/down position** linear motion (default: `5000`)
