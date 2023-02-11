@@ -91,6 +91,29 @@ On Windows with [Intiface Central](https://intiface.com/central/) installed...
 7. A new device should show up with the name configured in the JSON file.
 8. Click the `Toggle Oscillation` button and watch the NimbleConModule LEDs spin.
 
+![Buttplug Device UI](./docs/ButtplugIO-device-ui.jpg)
+
+## Testing with MultiFunPlayer
+
+1. Launch the [MultiFunPlayer](https://github.com/Yoooi0/MultiFunPlayer) application.
+2. In the Output section, add a "Serial" device (plus sign).
+3. Set the serial port to your COM port value (ie. "COM3").
+4. Test the connection with the play button.
+5. (Optional) To configure additional axes (L0, V0, A0, A1, A2) for multi script support...
+6. Open the Output Configuration panel.
+7. Clone the `TCode-0.3 (default)` config, name it `NimbleTcodeSerial`.
+8. Enable the channels you'd like to use. ie.:
+   - `L0` Up/Down (Select "Load unnamed script") - Default value: `50%`
+   - `V0` Vibrate - Default value: `0%` (off state)
+   - `A0` Valve - Default value: `50%` (off state)
+   - `A1` Force (can rename) - Default value: `100%` (max)
+   - `A2` Vibspeed (can rename) - Default value: `100%` (max)
+9. See screenshots below.
+
+![MultiFunPlayer Device Config](./docs/MFP-device-config.jpg)
+
+![MultiFunPlayer Device UI](./docs/MFP-device-ui.jpg)
+
 ## Attributions
 
 - Utilized examples from: <https://github.com/tyrm/nimblestroker/>
