@@ -1,6 +1,6 @@
 # NimbleTCodeSerial
 
-A [Toy Code (T-Code) v0.3](https://github.com/multiaxis/tcode-spec) compatible Serial Port firmware implementation for the [NimbleConModule](https://shop.exploratorydevices.com/product/connectivity-module-dev-kit/) controller for the [NimbleStroker](https://shop.exploratorydevices.com/).
+A [Toy Code (T-Code) v0.3](https://github.com/multiaxis/tcode-spec) compatible Serial Port firmware implementation for the [NimbleConModule](https://shop.exploratorydevices.com/product/connectivity-module-dev-kit/) ([NimbleStroker](https://shop.exploratorydevices.com/)).
 
 ## TCode Information
 
