@@ -25,14 +25,15 @@ A [Toy Code (T-Code) v0.3](https://github.com/multiaxis/tcode-spec) compatible S
 Other info:
 
 - Sending live control values to an axis will ease to the target value over multiple frames rather than jump immediately when the difference in change is large (> 100 t-code units, or >50 position units). This is intended to protect the user and device. ([Source1](https://github.com/mnh86/NimbleTCodeSerial/blob/6ab66638b2670115e770fdee9d2ec5c7b04f9390/include/TCodeAxis.h#L217-L228), [Source2](https://github.com/mnh86/NimbleTCodeSerial/blob/6ab66638b2670115e770fdee9d2ec5c7b04f9390/src/main.cpp#L104-L111))
-- Up/down position axis values that are sent to the NimbleStroker are set as (-750 to 750) instead of the full [documented range of (-1000 to 1000)](https://github.com/ExploratoryDevices/NimbleConModule/blob/main/README.md?plain=1#L25) to avoid piston damaging the actuator - slamming occurs at min/max ranges. This aligns with the same max/min values that the NimbleStroker Pendant sends to the actuator, from analysis of debug logging.
+- Up/down position axis values that are sent to the NimbleStroker are set as (-750 to 750) instead of the full [documented range of (-1000 to 1000)](https://github.com/ExploratoryDevices/NimbleConModule/blob/31f09fbcaa068b3d7fe8d47e44ea5ed11437c852/README.md?plain=1#L30) to avoid piston damaging the actuator (slamming occurs at min/max ranges). This aligns with the same max/min values that the NimbleStroker Pendant sends to the actuator, from debug log analysis.
+- [Acutuator feedback values](https://github.com/ExploratoryDevices/NimbleConModule/blob/31f09fbcaa068b3d7fe8d47e44ea5ed11437c852/README.md?plain=1#L24-L27) are not currently exposed in this firmware. Possible options could be to extend the tcode interface to support sensor data, or implement a separate interface (such as websockets) that clients could connect on.
 
 ## Usage
 
 1. Install [Windows Virtual COM Port (VCP) drivers](https://github.com/mnh86/NimbleConModule/blob/feat/docs/docs/setup-guide-windows-arduino-ide1.md#install-windows-virtual-com-port-vcp-drivers) for the USB/serial connection to the module.
 2. Set up [VSCode with PlatformIO](https://randomnerdtutorials.com/vs-code-platformio-ide-esp32-esp8266-arduino/)
 3. Clone this repo and open the project in VSCode
-4. Build and upload this program into the NimbleConModule
+4. Build and upload this program into the NimbleConModule (USB/serial)
 5. Attach the NimbleConModule to the actuator (Label A)
    - Note: Pendant connection not supported
 6. Long press the Encoder Dial (2 seconds) to stop commands to the actuator
