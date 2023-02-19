@@ -120,6 +120,6 @@ On Windows with [Intiface Central](https://intiface.com/central/) installed...
 
 - Utilized examples from: <https://github.com/tyrm/nimblestroker/>
 - Modified NimbleConSDK from: <https://github.com/ExploratoryDevices/NimbleConModule>
-- Includes (with minor mods): https://github.com/Dreamer2345/Arduino_TCode_Parser
+- Uses TCode library from: https://github.com/Dreamer2345/Arduino_TCode_Parser
 - See also [platformio.ini](./platformio.ini) for other 3rd party OSS libraries used in this project
 - @qdot on the [Buttplug.io Discord](https://discord.gg/h28chsBD) for support
