@@ -77,21 +77,21 @@ void setup()
     // TCode setup
     tcode.init();
     tcode.axisRegister("L0", F("Up")); // Up stroke position
-    tcode.axisWrite("L0", 5000); // 5000: midpoint
+    tcode.axisWrite("L0", 5000, ' ', 0); // 5000: midpoint
     tcode.axisEasingType("L0", EasingType::EASEINOUT);
 
     tcode.axisRegister("V0", F("Vibe")); // Vibration Amplitude
-    tcode.axisWrite("V0", 0);    // 0: vibration off
+    tcode.axisWrite("V0", 0, ' ', 0);    // 0: vibration off
     tcode.axisEasingType("V0", EasingType::EASEINOUT);
 
     tcode.axisRegister("A0", F("Air")); // Air in/out valve
-    tcode.axisWrite("A0", 5000); // 0: air out, 5000: stop, 9999: air in
+    tcode.axisWrite("A0", 5000, ' ', 0); // 0: air out, 5000: stop, 9999: air in
 
     tcode.axisRegister("A1", F("Force"));
-    tcode.axisWrite("A1", 9999); // 9999: max force
+    tcode.axisWrite("A1", 9999, ' ', 0); // 9999: max force
 
     tcode.axisRegister("A2", F("VibeSpeed"));
-    tcode.axisWrite("A2", 9999); // 9999: max vibration speed
+    tcode.axisWrite("A2", 9999, ' ', 0); // 9999: max vibration speed
 
     // Button interface
     btn.onDoublePress(pressHandler)
