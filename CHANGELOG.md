@@ -1,5 +1,10 @@
 # Change log
 
+## v0.4 - 02/21/2023
+- Refactor TCode setup into NimbleTCode.h for reuse with different connection methods (Serial, Wifi, BTLE).
+- Fix: Air in/out valve was getting stuck when device in off state (encoder press).
+- Change: Single clicking the encoder now toggles the run/stop state for the device (instead of double click/long press).
+
 ## v0.3 - 02/06/2023
 - Fix: Divide by zero crash during vibration calculations.
 - `L0` Up Position: mapped range was changed from (-1000 -> 1000) to (-750 -> 750). Based on analysis of Pendant behavior which does not send values higher than 750. Testing values at 1000 causes slamming of the actuator piston to occur against its enclosure.

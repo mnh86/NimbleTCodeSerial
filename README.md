@@ -1,6 +1,8 @@
 # NimbleTCodeSerial
 
-A [Toy Code (T-Code) v0.3](https://github.com/multiaxis/tcode-spec) compatible Serial Port firmware implementation for the [NimbleConModule](https://shop.exploratorydevices.com/product/connectivity-module-dev-kit/) ([NimbleStroker](https://shop.exploratorydevices.com/)).
+Firmware that implements the [Toy Code (T-Code) v0.3](https://github.com/multiaxis/tcode-spec) protocol over USB/Serial Port for the [Nimble Connectivity Module](https://shop.exploratorydevices.com/product/connectivity-module-dev-kit/), an ESP32 controller for the [NimbleStroker](https://shop.exploratorydevices.com/).
+
+Tested with Intiface Central (using custom configuration) and MultiFunPlayer's Serial output type, which connects to the Serial COM port interface of the NimbleConModule and sends T-Code commands as messages to the device. The T-Code commands are converted into position values which are then sent to the NimbleStroker actuator.
 
 ## TCode Information
 
@@ -36,9 +38,8 @@ Other info:
 4. Build and upload this program into the NimbleConModule (USB/serial)
 5. Attach the NimbleConModule to the actuator (Label A)
    - Note: Pendant connection not supported
-6. Long press the Encoder Dial (2 seconds) to stop commands to the actuator
-7. Double press the Encoder Dial to resume sending commands to the actuator
-8. Open the PlatformIO Serial Monitor. Enter a TCode command (ie. `D2`) to test.
+6. Open the PlatformIO Serial Monitor. Enter a TCode command (ie. `D2`) to test.
+7. Click the Encoder Dial to toggle stop/start sending commands to the actuator.
 
 ## Testing with Intiface® Central
 
