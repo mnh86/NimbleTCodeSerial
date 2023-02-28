@@ -1,5 +1,8 @@
 # Change log
 
+## v0.5 - 02/28/2023
+- Change: Single click toggle will also reset the actuator state when stopped (position = 0, force = max, vibration = off)
+
 ## v0.4 - 02/21/2023
 - Refactor TCode setup into NimbleTCode.h for reuse with different connection methods (Serial, Wifi, BTLE).
 - Fix: Air in/out valve was getting stuck when device in off state (encoder press).

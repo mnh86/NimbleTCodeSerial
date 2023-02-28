@@ -20,6 +20,7 @@ class NimbleTCode {
         NimbleTCode(const String &firmware) { tcode = new TCode<3>(firmware); }
         ~NimbleTCode() { delete tcode; }
         void init();
+        void resetState();
         void start() { running = true; }
         void stop() { tcode->stop(); running = false; }
         void toggle() { if (running) stop(); else start(); }
@@ -32,6 +33,7 @@ class NimbleTCode {
         void setVibrationAmplitude(uint16_t v) { vibrationAmplitude = min(max(v, (uint16_t)0), (uint16_t)VIBRATION_MAX_AMP); }
         void printFrameState(Print& out = Serial);
         bool isRunning() { return running; }
+        void setMessageCallback(TCODE_FUNCTION_PTR_T function) { tcode->setMessageCallback(function); }
 
     private:
         TCode<3> *tcode;
@@ -51,6 +53,7 @@ class NimbleTCode {
 void NimbleTCode::init()
 {
     initNimbleConModule();
+    resetState();
 
     tcode->init();
 
@@ -70,6 +73,14 @@ void NimbleTCode::init()
 
     tcode->axisRegister("A2", F("VibeSpeed"));
     tcode->axisWrite("A2", 9999, ' ', 0); // 9999: max vibration speed
+}
+
+void NimbleTCode::resetState() {
+    frame.targetPos = 0;
+    frame.force = MAX_FORCE;
+    frame.air = 0;
+    vibrationSpeed = VIBRATION_MAX_SPEED;
+    vibrationAmplitude = 0;
 }
 
 void NimbleTCode::handleAxisChanges()
