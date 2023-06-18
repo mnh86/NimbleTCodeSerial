@@ -141,9 +141,12 @@ void NimbleTCode::handleAirChanges()
     if (!tcode->axisChanged("A0")) return;
     int val = tcode->axisRead("A0");
 
-    if (val < 5000) {
+    //    0-3333 = air out 
+    // 3334-6666 = valve off
+    // 6667-9999 = air in
+    if (val < 3334) {
         frame.air = -1;
-    } else if (val > 5000) {
+    } else if (val > 6666) {
         frame.air = 1;
     } else {
         frame.air = 0;
